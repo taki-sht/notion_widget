@@ -1,15 +1,157 @@
 <!DOCTYPE html>
-<html>
-<body style="margin:0;display:flex;justify-content:center;align-items:center;height:100vh;font-size:48px;font-family:sans-serif;">
-<div id="clock"></div>
-<script>
-function updateClock(){
-  const now = new Date();
-  document.getElementById("clock").innerText =
-    now.toLocaleTimeString("ja-JP", {hour12:false});
-}
-setInterval(updateClock, 1000);
-updateClock();
-</script>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clock</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #e8e4dd;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* メインカード — 幅・高さ固定 */
+    .card {
+      width: 440px;
+      padding: 56px 0 48px;
+      border-radius: 20px;
+      background: #f7f4f0;
+      box-shadow:
+        0 1px 2px rgba(0,0,0,0.04),
+        0 8px 32px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+
+    /* 日付 */
+    #date {
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #a09890;
+      margin-bottom: 28px;
+    }
+
+    /* 時計行 — flex で各要素を独立配置 */
+    #clock {
+      display: flex;
+      justify-content: center;
+      align-items: baseline;
+      gap: 0;
+    }
+
+    /* 桁ペア（HH / MM / SS）— 幅固定でズレ防止 */
+    .digit {
+      font-family: 'DM Mono', monospace;
+      font-size: 72px;
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+      color: #2a2520;
+      width: 2ch;          /* 2文字分で常に固定 */
+      display: inline-block;
+      text-align: center;
+    }
+
+    /* コロン — 幅・位置を固定 */
+    .sep {
+      font-family: 'DM Mono', monospace;
+      font-size: 72px;
+      font-weight: 400;
+      line-height: 1;
+      color: #c4b8ac;
+      width: 0.55ch;
+      display: inline-block;
+      text-align: center;
+      animation: blink 1s step-end infinite;
+      /* baseline にぴったり合わせる */
+      position: relative;
+      top: -4px;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.15; }
+    }
+
+    /* 区切り */
+    .divider {
+      width: 32px;
+      height: 1px;
+      background: #d4cdc6;
+      margin: 36px auto 24px;
+    }
+
+    /* 秒プログレスバー */
+    #seconds-bar-wrap {
+      width: 200px;
+      height: 2px;
+      background: #ddd8d0;
+      border-radius: 99px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+
+    #seconds-bar {
+      height: 100%;
+      border-radius: 99px;
+      background: #8fa8b0;
+      transition: width 0.95s linear;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div id="date"></div>
+    <div id="clock">
+      <span class="digit" id="hh"></span><span class="sep">:</span><span class="digit" id="mm"></span><span class="sep">:</span><span class="digit" id="ss"></span>
+    </div>
+    <div class="divider"></div>
+    <div id="seconds-bar-wrap">
+      <div id="seconds-bar"></div>
+    </div>
+  </div>
+
+  <script>
+    const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+    function pad(n) { return String(n).padStart(2, '0'); }
+
+    // 各spannを初回に取得しておく（毎秒のDOMルックアップを最小化）
+    const elHH  = document.getElementById('hh');
+    const elMM  = document.getElementById('mm');
+    const elSS  = document.getElementById('ss');
+    const elDate = document.getElementById('date');
+    const elBar  = document.getElementById('seconds-bar');
+
+    function updateClock() {
+      const now = new Date();
+      const h = pad(now.getHours());
+      const m = pad(now.getMinutes());
+      const s = pad(now.getSeconds());
+
+      // textContent のみ更新 → DOM構造は一切変わらないのでコロンが動かない
+      elHH.textContent = h;
+      elMM.textContent = m;
+      elSS.textContent = s;
+
+      elDate.textContent =
+        `${DAYS[now.getDay()]}  ·  ${MONTHS[now.getMonth()]} ${now.getDate()},  ${now.getFullYear()}`;
+
+      const pct = (now.getSeconds() / 60) * 100;
+      elBar.style.width = pct + '%';
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock();
+  </script>
 </body>
 </html>
