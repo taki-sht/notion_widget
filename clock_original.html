@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<body style="margin:0;display:flex;justify-content:center;align-items:center;height:100vh;font-size:48px;font-family:sans-serif;">
+<div id="clock"></div>
+<script>
+function updateClock(){
+  const now = new Date();
+  document.getElementById("clock").innerText =
+    now.toLocaleTimeString("ja-JP", {hour12:false});
+}
+setInterval(updateClock, 1000);
+updateClock();
+</script>
+</body>
+</html>
